@@ -1,0 +1,67 @@
+{
+  "name": "custom-grpc-server-b",
+  "version": "1.0.0",
+  "description": "try to release a custom connection between small chunks in simple app",
+  "main": "server.js",
+  "scripts": {
+    "start_dev": "npx babel-node server.js",
+    "start": "node build/server.js",
+    "test": "mocha --require @babel/register  test/ --recursive --require @babel/polyfill",
+    "clean": "rm -rf build",
+    "build": "npm run-script clean && npx babel src --out-dir build --copy-files --source-maps",
+    "build_start": "npm run-script build && npm run-script start"
+  },
+  "author": "mohamedBrahimi",
+  "license": "ISC",
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ],
+    "plugins": [
+      "@babel/plugin-syntax-dynamic-import",
+      "@babel/plugin-syntax-import-meta",
+      "@babel/plugin-proposal-class-properties",
+      "@babel/plugin-proposal-json-strings",
+      "@babel/plugin-proposal-optional-chaining"
+    ]
+  },
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.4",
+    "boom": "^7.2.0",
+    "good": "^8.1.1",
+    "good-console": "^7.1.0",
+    "good-squeeze": "^5.1.0",
+    "google-protobuf": "^3.6.0",
+    "grpc": "^1.13.0",
+    "grpcli": "^0.7.5",
+    "hapi": "^17.5.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/node": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-json-strings": "^7.7.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.7.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.7.4",
+    "@babel/plugin-syntax-import-meta": "^7.7.4",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/register": "^7.9.0",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-flow": "^1.0.2",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.17.0",
+    "mocha": "^7.1.1"
+  }
+}
