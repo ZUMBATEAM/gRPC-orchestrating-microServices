@@ -1,65 +1,90 @@
-import gRPC from 'grpc';
-import hAPI from 'hapi';
-import good from 'good';
-import { getSimpleData } from './app/controller/getSimpleData.controller';
-const protoLoader = require('@grpc/proto-loader');
+import express from 'express';
+import compression from 'compression';
+import privateRouter from './app/services/routes';
+
+
 // const Boom = require('boom');
+import { DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT } from './app/config/services';
 
+const PORT = process.env.PORT || DEFAULT_SERVER_PORT;
+const HOST = process.env.HOST || DEFAULT_SERVER_HOST;
 
-const packageDefinition = protoLoader.loadSync('.porto', {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-});
-const packageObject = gRPC.loadPackageDefinition(packageDefinition);
+const app = express();
 
-const client = new packageObject.SampleDataService('localhost:8001', gRPC.credentials.createInsecure());
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(compression());
 
-
-const options = {
-    reporters: {
-        myConsoleReporter: [
-            {
-                module: 'good-squeeze',
-                name: 'Squeeze',
-                args: [{ log: '*', response: '*' }],
-            }, {
-                module: 'good-console',
-            }, 'stdout',
-        ],
-    },
+// CORS middleware
+const allowCrossDomain = function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
 };
 
-const server = hAPI.server({
-    host: '0.0.0.0',
-    port: 8000,
+app.use(allowCrossDomain);
+
+app.use(allowCrossDomain);
+app.use('/private/api/v1', privateRouter);
+
+
+app.use('*', (req, res, next) => {
+    console.error('handled'); // Log error message in our server's console
+    // If err has no specified error code, set error code to 'Internal Server Error (500)'
+    return res.status(500).send('{}'); // All HTTP requests must have a response, so let's send back an error with its status code and message
 });
 
-server.route({
-    method: 'GET',
-    path: '/',
-    handler: async (request, h) => {
-        const allResults = await getSimpleData(client);
-        return h.response(allResults);
-    },
-});
 
 
-const start = async () => {
-    try {
-        if (!module.parent) {
-            await server.register({
-                plugin: good,
-                options,
-            });
-            await server.start();
-        }
-        console.log('server started');
-    } catch (err) {
-        console.log('failed to start the server', err);
-    }
-};
+app.listen(PORT, () => console.warn(`listening to http server on ${HOST}:${PORT}...`));
 
-start();
+app.on('error', (err) => console.warn(err));
+
+// return app;
+
+// const options = {
+//     reporters: {
+//         myConsoleReporter: [
+//             {
+//                 module: 'good-squeeze',
+//                 name: 'Squeeze',
+//                 args: [{ log: '*', response: '*' }],
+//             }, {
+//                 module: 'good-console',
+//             }, 'stdout',
+//         ],
+//     },
+// };
+//
+// const server = hAPI.server({
+//     host: '0.0.0.0',
+//     port: 8000,
+// });
+
+// server.route({
+//     method: 'GET',
+//     path: '/',
+//     handler: async (request, h) => {
+//         const allResults = await getSimpleData(client);
+//         return h.response(allResults);
+//     },
+// });
+
+
+// const start = async () => {
+//     try {
+//         if (!module.parent) {
+//             await server.register({
+//                 plugin: good,
+//                 options,
+//             });
+//             await server.start();
+//         }
+//         console.log('server started');
+//     } catch (err) {
+//         console.log('failed to start the server', err);
+//     }
+// };
+//
+// start();
